@@ -147,6 +147,8 @@ function salvarNovaAcao(event) {
   tarefa.acoes.push({
     id: Date.now(),
     texto
+
+  overlay.classList.remove("active");
   });
 
   localStorage.setItem("tarefas", JSON.stringify(tarefas));
