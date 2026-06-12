@@ -6,6 +6,7 @@ const lista = document.getElementById("lista");
 const overlay = document.getElementById("overlay");
 const criarTarefa = document.getElementById("criarTarefa");
 const busca = document.getElementById("busca");
+const modalAcao = document.getElementById("modalAcao");
 
 let tarefaAtual = null;
 
@@ -130,6 +131,8 @@ function abrirModalAcao(id) {
 function fecharModalAcao() {
   modalAcao.classList.remove("active");
   document.getElementById("textoAcao").value = "";
+  overlay.classList.remove("active");
+
 }
 
 function salvarNovaAcao(event) {
@@ -147,8 +150,6 @@ function salvarNovaAcao(event) {
   tarefa.acoes.push({
     id: Date.now(),
     texto
-
-  overlay.classList.remove("active");
   });
 
   localStorage.setItem("tarefas", JSON.stringify(tarefas));
@@ -159,6 +160,19 @@ function salvarNovaAcao(event) {
 
   buscarTarefas();
 }
+
+function fecharTodosModais() {
+  overlay.classList.remove("active");
+  criarTarefa.classList.remove("active");
+  modalAcao.classList.remove("active");
+
+  document.getElementById("textoAcao").value = "";
+}
+
+overlay.addEventListener("click", () => {
+  fecharTodosModais();
+});
+
 
 function removerAcao(idTarefa, idAcao) {
   const tarefas = JSON.parse(localStorage.getItem("tarefas")) || [];
@@ -298,15 +312,10 @@ function pesquisarTarefa() {
 }
 
 // ESC
-document.addEventListener("keydown", event => {
-
-  if (
-    event.key === "Escape" &&
-    criarTarefa.classList.contains("active")
-  ) {
-    fecharModal();
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape") {
+    fecharTodosModais();
   }
-
 });
 
 // Inicializar
