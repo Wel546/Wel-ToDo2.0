@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Wel's To Do</title>
+  <link rel="stylesheet" href="index.css">
+</head>
+<body>
+
+  <header>
+    <input
+      type="text"
+      id="busca"
+      placeholder="Pesquisar por título"
+      onkeyup="pesquisarTarefa()"
+    >
+  </header>
+
+  <main>
+
+    <section id="tarefas">
+      <h2>
+        Tarefas
+        <button onclick="abrirModal()">Nova tarefa</button>
+      </h2>
+
+      <ul id="lista"></ul>
+    </section>
+
+    <section id="overlay" onclick="fecharModal()"></section>
+
+    <div id="criarTarefa" class="modal">
+      <form onsubmit="novaTarefa(event)">
+
+        <h3>
+          Criar tarefa
+          <box-icon name='x-circle' onclick="fecharModal()"></box-icon>
+        </h3>
+
+        <label for="titulo">Título</label>
+        <input type="text" id="titulo" required>
+
+        <label for="descricao">Descrição</label>
+        <textarea id="descricao" required></textarea>
+
+        <label for="observacao">Observação</label>
+        <textarea id="observacao"></textarea>
+
+        <button type="submit">Criar</button>
+
+      </form>
+    </div>
+
+<div id="modalAcao" class="modal">
+
+  <form onsubmit="salvarNovaAcao(event)">
+
+    <h3>
+      Nova ação
+      <box-icon
+        name="x-circle"
+        onclick="fecharModalAcao()">
+      </box-icon>
+    </h3>
+
+    <label>Ação realizada</label>
+
+    <textarea id="textoAcao" required></textarea>
+
+    <button type="submit">Salvar</button>
+
+  </form>
+
+</div>
+
+  </main>
+
+  <footer>
+    ©WelPages
+  </footer>
+
+  <script src="https://unpkg.com/boxicons@2.1.4/dist/boxicons.js"></script>
+  <script src="index.js"></script>
+
+</body>
+</html>
