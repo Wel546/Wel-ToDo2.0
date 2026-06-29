@@ -59,7 +59,7 @@ li.innerHTML = `
 
   <h5>Descrição</h5>
   
-  <p>${tarefa.descricao}</p>
+  <p id="desc">${tarefa.descricao}</p>
 
   <hr>
 
