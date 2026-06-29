@@ -173,6 +173,10 @@ body {
   width: 100%;
 }
 
+#desc {
+  white-space: pre-wrap;
+}
+
 hr {
   height: 1px;
   width: 100%;
