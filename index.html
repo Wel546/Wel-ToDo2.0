@@ -9,12 +9,72 @@
 <body>
 
   <header>
-    <input
-      type="text"
-      id="busca"
-      placeholder="Pesquisar por título"
-      onkeyup="pesquisarTarefa()"
-    >
+    <div class="header-container">
+      <div class="header-top">
+        <input
+          type="text"
+          id="busca"
+          placeholder="Pesquisar por título ou descrição..."
+          onkeyup="buscarTarefas()"
+        >
+        <!-- Botão para abrir modal de aparência -->
+        <button class="tema-btn" onclick="abrirModalAparencia()" title="Personalizar Apaparência">
+          <box-icon name='palette' color='white'></box-icon>
+        </button>
+      </div>
+      
+      <div class="controles-filtros">
+        <div class="filtro-grupo">
+          <label for="ordenarPor">Ordenar por:</label>
+          <!-- Select Nativo (Invisível) -->
+          <select id="ordenarPor" onchange="buscarTarefas()" style="display: none;">
+            <option value="data_desc">Mais recentes</option>
+            <option value="data_asc">Mais antigas</option>
+            <option value="prioridade">Prioridade (Alta -> Baixa)</option>
+            <option value="titulo">Título (A-Z)</option>
+          </select>
+
+          <!-- Dropdown Customizado Arredondado -->
+          <div class="dropdown-custom">
+            <div class="dropdown-trigger" tabindex="0">
+              <span>Mais recentes</span>
+              <span class="seta">▼</span>
+            </div>
+            <div class="dropdown-menu">
+              <div class="dropdown-item ativo" data-value="data_desc">Mais recentes</div>
+              <div class="dropdown-item" data-value="data_asc">Mais antigas</div>
+              <div class="dropdown-item" data-value="prioridade">Prioridade (Alta -> Baixa)</div>
+              <div class="dropdown-item" data-value="titulo">Título (A-Z)</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="filtro-grupo">
+          <label for="filtrarPrioridade">Prioridade:</label>
+          <!-- Select Nativo (Invisível) -->
+          <select id="filtrarPrioridade" onchange="buscarTarefas()" style="display: none;">
+            <option value="todas">Todas</option>
+            <option value="alta">Alta</option>
+            <option value="media">Média</option>
+            <option value="baixa">Baixa</option>
+          </select>
+
+          <!-- Dropdown Customizado Arredondado -->
+          <div class="dropdown-custom">
+            <div class="dropdown-trigger" tabindex="0">
+              <span>Todas</span>
+              <span class="seta">▼</span>
+            </div>
+            <div class="dropdown-menu">
+              <div class="dropdown-item ativo" data-value="todas">Todas</div>
+              <div class="dropdown-item" data-value="alta">Alta</div>
+              <div class="dropdown-item" data-value="media">Média</div>
+              <div class="dropdown-item" data-value="baixa">Baixa</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   </header>
 
   <main>
@@ -28,51 +88,93 @@
       <ul id="lista"></ul>
     </section>
 
-    <section id="overlay" onclick="fecharModal()"></section>
+    <section id="overlay"></section>
 
+    <!-- Modal Criar Tarefa -->
     <div id="criarTarefa" class="modal">
       <form onsubmit="novaTarefa(event)">
-
         <h3>
           Criar tarefa
           <box-icon name='x-circle' onclick="fecharModal()"></box-icon>
         </h3>
 
-        <label for="titulo">Título</label>
+        <label for="titulo">Título *</label>
         <input type="text" id="titulo" required>
 
-        <label for="descricao">Descrição</label>
+        <label for="prioridade">Prioridade *</label>
+        <select id="prioridade" required>
+          <option value="baixa">Baixa</option>
+          <option value="media" selected>Média</option>
+          <option value="alta">Alta</option>
+        </select>
+
+        <label for="descricao">Descrição *</label>
         <textarea id="descricao" required></textarea>
 
         <label for="observacao">Observação</label>
         <textarea id="observacao"></textarea>
 
         <button type="submit">Criar</button>
-
       </form>
     </div>
 
-<div id="modalAcao" class="modal">
+    <!-- Modal Nova Ação -->
+    <div id="modalAcao" class="modal">
+      <form onsubmit="salvarNovaAcao(event)">
+        <h3>
+          Nova ação
+          <box-icon name="x-circle" onclick="fecharModalAcao()"></box-icon>
+        </h3>
 
-  <form onsubmit="salvarNovaAcao(event)">
+        <label for="textoAcao">Ação realizada *</label>
+        <textarea id="textoAcao" required></textarea>
 
-    <h3>
-      Nova ação
-      <box-icon
-        name="x-circle"
-        onclick="fecharModalAcao()">
-      </box-icon>
-    </h3>
+        <button type="submit">Salvar</button>
+      </form>
+    </div>
 
-    <label>Ação realizada</label>
+    <!-- Modal Aparência / Temas -->
+    <div id="modalAparencia" class="modal">
+      <h3>
+        Aparência e Estilo
+        <box-icon name='x-circle' onclick="fecharModalAparencia()"></box-icon>
+      </h3>
 
-    <textarea id="textoAcao" required></textarea>
+      <div class="opcao-aparencia">
+        <label>Modo de Cor:</label>
+        <div class="botoes-grupo">
+          <button type="button" onclick="alterarModo('claro')">Claro</button>
+          <button type="button" onclick="alterarModo('escuro')">Escuro</button>
+        </div>
+      </div>
 
-    <button type="submit">Salvar</button>
+      <div class="opcao-aparencia">
+        <label>Cor de Destaque:</label>
+        <div class="cores-container">
+          <div class="cor-circulo" style="background: #1b76dd;" onclick="alterarCor('#1b76dd', '#1358a7', '#1b76dd')"></div>
+          <div class="cor-circulo" style="background: #2ed573;" onclick="alterarCor('#2ed573', '#26af5f', '#2ed573')"></div>
+          <div class="cor-circulo" style="background: #a55eea;" onclick="alterarCor('#a55eea', '#8854d0', '#a55eea')"></div>
+          <div class="cor-circulo" style="background: #ff6bc6;" onclick="alterarCor('#ff6bc6', '#ff34b1', '#ff6bc6')"></div>
+          <div class="cor-circulo" style="background: #e20505;" onclick="alterarCor('#e20505', '#8f0202', '#e20505')"></div>
+          <div class="cor-circulo" style="background: #ffda4d;" onclick="alterarCor('#ffda4d', '#ffcc00', '#ffda4d')"></div>
+          <div class="cor-circulo" style="background: #ffa502;" onclick="alterarCor('#ffa502', '#eccc68', '#ffa502')"></div>
+        </div>
+      </div>
 
-  </form>
-
-</div>
+      <!-- Papel de Parede: Upload ou URL -->
+      <div class="opcao-aparencia">
+        <label for="bgFile">Enviar do Computador:</label>
+        <input type="file" id="bgFile" accept="image/*" onchange="uploadPapelParede(event)">
+        
+        <label for="bgUrl" style="margin-top: 10px;">Ou Cole uma URL de Imagem:</label>
+        <input type="text" id="bgUrl" placeholder="https://exemplo.com/imagem.jpg">
+        
+        <div class="botoes-grupo" style="margin-top: 8px;">
+          <button type="button" class="salvar-btn" onclick="aplicarPapelParede()">Aplicar URL</button>
+          <button type="button" class="salvar-btn" style="background-color: #747d8c;" onclick="removerPapelParede()">Remover</button>
+        </div>
+      </div>
+    </div>
 
   </main>
 
