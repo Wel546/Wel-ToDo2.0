@@ -492,6 +492,9 @@ body.dark-theme .status-select.em_andamento {
 
 .modal {
   width: 400px;
+  max-width: 92vw;
+  max-height: 85vh;
+  overflow-y: auto;
   background-color: var(--card-bg);
   color: var(--text-color);
   padding: 20px;
@@ -775,4 +778,21 @@ html {
 *::-webkit-scrollbar-thumb:hover,
 ::-webkit-scrollbar-thumb:hover {
   background-color: var(--primary-hover) !important;
+}
+
+/* Remove o quadrado/linha azul de foco em botões, ícones, inputs e elementos clicáveis */
+*:focus,
+*:focus-visible,
+button:focus,
+box-icon:focus,
+.dropdown-trigger:focus,
+.pin-btn:focus,
+.trash-btn:focus {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+/* Remove a caixa de destaque azul ao tocar em telas mobile / touch */
+* {
+  -webkit-tap-highlight-color: transparent !important;
 }

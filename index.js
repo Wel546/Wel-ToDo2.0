@@ -106,13 +106,16 @@ function resetFormCriarTarefa() {
 // GERENCIAMENTO DE MODAIS E OVERLAY
 // ===================================
 function abrirModal() {
-  fecharTodosModais();
+fecharTodosModais();
+  document.body.style.overflow = "hidden";
   overlay.classList.add("active");
   criarTarefa.classList.add("active");
 }
 
 function fecharModal() {
-  fecharTodosModais();
+document.body.style.overflow = ""; 
+  overlay.classList.remove("active");
+  document.querySelectorAll('.modal').forEach(modal => modal.classList.remove('active'))
 }
 
 function abrirModalAcao(id) {
