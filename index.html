@@ -73,6 +73,31 @@
             </div>
           </div>
         </div>
+
+        <!-- Filtro por Status -->
+        <div class="filtro-grupo">
+          <label for="filtrarStatus">Status:</label>
+          <select id="filtrarStatus" onchange="buscarTarefas()" style="display: none;">
+            <option value="todos">Todos</option>
+            <option value="concluida">Concluida</option>
+            <option value="pendente">Pendente</option>
+            <option value="em_andamento">Em andamento</option>
+          </select>
+
+          <div class="dropdown-custom">
+            <div class="dropdown-trigger" tabindex="0">
+              <span>Todos</span>
+              <span class="seta">▼</span>
+            </div>
+            <div class="dropdown-menu">
+              <div class="dropdown-item ativo" data-value="todos">Todos</div>
+              <div class="dropdown-item" data-value="concluida">Concluida</div>
+              <div class="dropdown-item" data-value="pendente">Pendente</div>
+              <div class="dropdown-item" data-value="em_andamento">Em andamento</div>
+            </div>
+          </div>
+        </div>
+
       </div>
     </div>
   </header>
@@ -106,6 +131,12 @@
           <option value="baixa">Baixa</option>
           <option value="media" selected>Média</option>
           <option value="alta">Alta</option>
+        </select>
+
+        <label for="statusProgresso">Status Inicial *</label>
+        <select id="statusProgresso" required>
+          <option value="pendente" selected>🔴 Pendente</option>
+          <option value="em_andamento">🟡 Em andamento</option>
         </select>
 
         <label for="descricao">Descrição *</label>
@@ -161,7 +192,6 @@
         </div>
       </div>
 
-      <!-- Papel de Parede: Upload ou URL -->
       <div class="opcao-aparencia">
         <label for="bgFile">Enviar do Computador:</label>
         <input type="file" id="bgFile" accept="image/*" onchange="uploadPapelParede(event)">

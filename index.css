@@ -114,7 +114,7 @@ header input {
 .dropdown-custom {
   position: relative;
   display: inline-block;
-  min-width: 190px;
+  min-width: 170px;
   font-size: 12px;
   font-weight: normal;
 }
@@ -297,6 +297,48 @@ header input {
   color: #137333;
 }
 
+/* --- SELECT PERSONALIZADO DE STATUS DE PROGRESSO --- */
+.status-select-container {
+  margin: 2px 0 6px 0;
+}
+
+.status-select {
+  width: 100%;
+  height: 32px;
+  padding: 0 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: bold;
+  cursor: pointer;
+  outline: none;
+  border: 1px solid var(--border-color);
+  transition: all 0.2s ease;
+}
+
+.status-select.pendente {
+  background-color: #ffebee;
+  color: #c62828;
+  border-color: #ffcdd2;
+}
+
+.status-select.em_andamento {
+  background-color: #fff8e1;
+  color: #f57f17;
+  border-color: #ffe082;
+}
+
+body.dark-theme .status-select.pendente {
+  background-color: #3e1414;
+  color: #ef9a9a;
+  border-color: #b71c1c;
+}
+
+body.dark-theme .status-select.em_andamento {
+  background-color: #3e3214;
+  color: #ffe082;
+  border-color: #f57f17;
+}
+
 .data-registro {
   font-size: 11px;
   color: var(--text-muted);
@@ -320,43 +362,38 @@ header input {
 }
 
 .checkbox-container input[type="checkbox"] {
-  /* Remove a aparência padrão do sistema */
   -webkit-appearance: none;
   appearance: none;
-  
   width: 18px;
   height: 18px;
-  border: 2px solid var(--primary-color); /* Borda desmarcada usando a cor do tema */
+  border: 2px solid var(--primary-color);
   border-radius: 4px;
-  background-color: var(--card-bg);        /* Fundo quando desmarcado */
+  background-color: var(--card-bg);
   cursor: pointer;
   display: grid;
   place-content: center;
   transition: all 0.2s ease;
 }
 
-/* Ícone de check (V) desenhado com pseudo-elemento */
 .checkbox-container input[type="checkbox"]::before {
   content: "";
   width: 10px;
   height: 10px;
   clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%);
   transform: scale(0);
-  background-color: #ffffff; /* Cor do 'V' de check */
+  background-color: #ffffff;
   transition: transform 0.15s ease-in-out;
 }
 
-/* Estado SELECIONADO / MARCADO */
 .checkbox-container input[type="checkbox"]:checked {
-  background-color: var(--primary-color); /* Fundo quando marcado */
+  background-color: var(--primary-color);
   border-color: var(--primary-color);
 }
 
 .checkbox-container input[type="checkbox"]:checked::before {
-  transform: scale(1); /* Exibe o 'V' de check */
+  transform: scale(1);
 }
 
-/* Efeito ao passar o mouse */
 .checkbox-container input[type="checkbox"]:hover {
   border-color: var(--primary-hover);
 }

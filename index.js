@@ -3,6 +3,7 @@ const titulo = document.getElementById("titulo");
 const descricao = document.getElementById("descricao");
 const observacao = document.getElementById("observacao");
 const prioridade = document.getElementById("prioridade");
+const statusProgresso = document.getElementById("statusProgresso");
 const lista = document.getElementById("lista");
 const overlay = document.getElementById("overlay");
 const criarTarefa = document.getElementById("criarTarefa");
@@ -11,8 +12,18 @@ const modalAcao = document.getElementById("modalAcao");
 const modalAparencia = document.getElementById("modalAparencia");
 const ordenarPor = document.getElementById("ordenarPor");
 const filtrarPrioridade = document.getElementById("filtrarPrioridade");
+const filtrarStatus = document.getElementById("filtrarStatus");
 
 let tarefaAtual = null;
+
+// ===================================
+// INICIALIZAÇÃO DA APLICAÇÃO
+// ===================================
+document.addEventListener("DOMContentLoaded", () => {
+  carregarPreferenciaAparencia();
+  inicializarDropdownsCustomizados();
+  buscarTarefas();
+});
 
 // ===================================
 // SISTEMA DE DROPDOWNS CUSTOMIZADOS
@@ -21,7 +32,10 @@ function inicializarDropdownsCustomizados() {
   document.querySelectorAll('.dropdown-custom').forEach(dropdown => {
     const trigger = dropdown.querySelector('.dropdown-trigger');
     const items = dropdown.querySelectorAll('.dropdown-item');
-    const selectOriginal = dropdown.parentElement.querySelector('select');
+    const selectOriginal = dropdown.parentElement ? dropdown.parentElement.querySelector('select') : null;
+
+    if (dropdown.dataset.initialized === "true") return;
+    dropdown.dataset.initialized = "true";
 
     trigger.addEventListener('click', (e) => {
       e.stopPropagation();
@@ -33,13 +47,16 @@ function inicializarDropdownsCustomizados() {
 
     items.forEach(item => {
       item.addEventListener('click', () => {
-        trigger.querySelector('span').innerText = item.innerText;
+        const value = item.getAttribute('data-value');
+        const text = item.innerText;
+
+        trigger.querySelector('span').innerText = text;
         
         items.forEach(i => i.classList.remove('ativo'));
         item.classList.add('ativo');
 
         if (selectOriginal) {
-          selectOriginal.value = item.getAttribute('data-value');
+          selectOriginal.value = value;
           buscarTarefas();
         }
 
@@ -56,7 +73,6 @@ function inicializarDropdownsCustomizados() {
 // ===================================
 // SISTEMA DE APARÊNCIA E PAPEL DE PAREDE
 // ===================================
-
 function abrirModalAparencia() {
   overlay.classList.add("active");
   modalAparencia.classList.add("active");
@@ -85,7 +101,6 @@ function alterarCor(primaria, hover, textMuted) {
   salvarPreferenciaAparencia();
 }
 
-// Upload de arquivo local do computador
 function uploadPapelParede(event) {
   const file = event.target.files[0];
   if (file) {
@@ -93,24 +108,22 @@ function uploadPapelParede(event) {
     reader.onload = function(e) {
       const base64Image = e.target.result;
       document.documentElement.style.setProperty('--bg-image', `url('${base64Image}')`);
-      document.getElementById("bgUrl").value = ""; // limpa o campo de URL
+      document.getElementById("bgUrl").value = "";
       salvarPreferenciaAparencia();
     };
     reader.readAsDataURL(file);
   }
 }
 
-// Aplicação via URL de imagem
 function aplicarPapelParede() {
   const url = document.getElementById("bgUrl").value.trim();
   if (url) {
     document.documentElement.style.setProperty('--bg-image', `url('${url}')`);
-    document.getElementById("bgFile").value = ""; // limpa o input de arquivo
+    document.getElementById("bgFile").value = "";
     salvarPreferenciaAparencia();
   }
 }
 
-// Removendo o papel de parede
 function removerPapelParede() {
   document.documentElement.style.setProperty('--bg-image', 'none');
   document.getElementById("bgUrl").value = "";
@@ -155,7 +168,6 @@ function carregarPreferenciaAparencia() {
   if (aparencia.bgImage && aparencia.bgImage !== 'none') {
     document.documentElement.style.setProperty('--bg-image', aparencia.bgImage);
     
-    // Se for URL externa, preenche o campo correspondente
     if (!aparencia.bgImage.startsWith("url('data:")) {
       const urlLimpa = aparencia.bgImage.replace(/^url\(['"]?/, '').replace(/['"]?\)$/, '');
       const inputBg = document.getElementById("bgUrl");
@@ -167,10 +179,10 @@ function carregarPreferenciaAparencia() {
 // ===================================
 // LÓGICA DAS TAREFAS
 // ===================================
-
 function buscarTarefas() {
   let tarefas = JSON.parse(localStorage.getItem("tarefas")) || [];
 
+  // 1. Filtro por Busca de Texto
   const termo = busca.value.toLowerCase().trim();
   if (termo) {
     tarefas = tarefas.filter(t => 
@@ -179,12 +191,28 @@ function buscarTarefas() {
     );
   }
 
-  const prioFiltro = filtrarPrioridade.value;
+  // 2. Filtro por Prioridade
+  const prioFiltro = filtrarPrioridade ? filtrarPrioridade.value : "todas";
   if (prioFiltro !== "todas") {
     tarefas = tarefas.filter(t => t.prioridade === prioFiltro);
   }
 
-  const criterio = ordenarPor.value;
+  // 3. Filtro por Status e Conclusão
+  const statusFiltro = filtrarStatus ? filtrarStatus.value : "todos";
+
+  if (statusFiltro === "pendente") {
+    // Apenas pendentes E que NÃO estejam concluídas
+    tarefas = tarefas.filter(t => !t.concluida && (t.statusProgresso || "pendente") === "pendente");
+  } else if (statusFiltro === "em_andamento") {
+    // Apenas em andamento E que NÃO estejam concluídas
+    tarefas = tarefas.filter(t => !t.concluida && t.statusProgresso === "em_andamento");
+  } else if (statusFiltro === "concluida") {
+    // Apenas tarefas marcadas como concluídas
+    tarefas = tarefas.filter(t => t.concluida);
+  }
+
+  // 4. Ordenação
+  const criterio = ordenarPor ? ordenarPor.value : "data_desc";
   const pesosPrioridade = { alta: 3, media: 2, baixa: 1 };
 
   tarefas.sort((a, b) => {
@@ -235,9 +263,12 @@ function inserirTarefas(tarefas) {
 
   tarefas.forEach(tarefa => {
     const li = document.createElement("li");
+    const stProgresso = tarefa.statusProgresso || "pendente";
 
     if (tarefa.concluida) li.classList.add("concluida");
     if (tarefa.fixada) li.classList.add("fixada");
+
+    const rotuloStatus = stProgresso === "em_andamento" ? "🟡 Em andamento" : "🔴 Pendente";
 
     li.innerHTML = `
       <div class="card-header">
@@ -262,6 +293,32 @@ function inserirTarefas(tarefas) {
       <div class="badge-container">
         <span class="badge badge-${tarefa.prioridade}">${tarefa.prioridade}</span>
         <span class="data-registro">Criado: ${formatarData(tarefa.criadaEm)}</span>
+      </div>
+
+      <!-- DROPDOWN CUSTOMIZADO DE STATUS DE PROGRESSO (Ocultado quando concluída) -->
+      <div class="status-select-container" style="display: ${tarefa.concluida ? 'none' : 'block'};">
+        <div class="dropdown-custom dropdown-card">
+          <div class="dropdown-trigger">
+            <span>${rotuloStatus}</span>
+            <box-icon name="chevron-down"></box-icon>
+          </div>
+          <div class="dropdown-menu">
+            <div 
+              class="dropdown-item ${stProgresso === 'pendente' ? 'ativo' : ''}" 
+              data-value="pendente"
+              onclick="alterarStatusProgresso(${tarefa.id}, 'pendente')"
+            >
+              🔴 Pendente
+            </div>
+            <div 
+              class="dropdown-item ${stProgresso === 'em_andamento' ? 'ativo' : ''}" 
+              data-value="em_andamento"
+              onclick="alterarStatusProgresso(${tarefa.id}, 'em_andamento')"
+            >
+              🟡 Em andamento
+            </div>
+          </div>
+        </div>
       </div>
 
       <div class="checkbox-container">
@@ -318,9 +375,13 @@ function inserirTarefas(tarefas) {
 
     lista.appendChild(li);
   });
+
+  inicializarDropdownsCustomizados();
 }
 
-// Modais
+// ===================================
+// GERENCIAMENTO DE MODAIS
+// ===================================
 function abrirModal() {
   overlay.classList.add("active");
   criarTarefa.classList.add("active");
@@ -353,7 +414,9 @@ function fecharTodosModais() {
 
 overlay.addEventListener("click", fecharTodosModais);
 
-// Ações
+// ===================================
+// AÇÕES E MUTAÇÕES DE TAREFAS
+// ===================================
 function novaTarefa(event) {
   event.preventDefault();
 
@@ -363,6 +426,7 @@ function novaTarefa(event) {
     id: Date.now(),
     titulo: titulo.value.trim(),
     prioridade: prioridade.value,
+    statusProgresso: statusProgresso.value,
     descricao: descricao.value.trim(),
     observacao: observacao.value.trim(),
     concluida: false,
@@ -393,6 +457,24 @@ function alternarFixar(id) {
   }
 }
 
+function deletarTarefa(id) {
+  let tarefas = JSON.parse(localStorage.getItem("tarefas")) || [];
+  tarefas = tarefas.filter(t => t.id !== id);
+  localStorage.setItem("tarefas", JSON.stringify(tarefas));
+  buscarTarefas();
+}
+
+function alterarStatusProgresso(id, novoStatus) {
+  const tarefas = JSON.parse(localStorage.getItem("tarefas")) || [];
+  const tarefa = tarefas.find(t => t.id === id);
+
+  if (tarefa) {
+    tarefa.statusProgresso = novoStatus;
+    localStorage.setItem("tarefas", JSON.stringify(tarefas));
+    buscarTarefas();
+  }
+}
+
 function alterarStatus(id, concluida) {
   const tarefas = JSON.parse(localStorage.getItem("tarefas")) || [];
   const tarefa = tarefas.find(t => t.id === id);
@@ -407,17 +489,22 @@ function alterarStatus(id, concluida) {
 function salvarObservacao(id) {
   const tarefas = JSON.parse(localStorage.getItem("tarefas")) || [];
   const tarefa = tarefas.find(t => t.id === id);
+  const inputObs = document.getElementById(`obs-${id}`);
 
-  if (tarefa) {
-    tarefa.observacao = document.getElementById(`obs-${id}`).value;
+  if (tarefa && inputObs) {
+    tarefa.observacao = inputObs.value.trim();
     localStorage.setItem("tarefas", JSON.stringify(tarefas));
-    alert("Observação salva com sucesso!");
+    buscarTarefas();
   }
 }
 
 function salvarNovaAcao(event) {
   event.preventDefault();
-  const texto = document.getElementById("textoAcao").value.trim();
+  if (!tarefaAtual) return;
+
+  const textoAcaoInput = document.getElementById("textoAcao");
+  const texto = textoAcaoInput.value.trim();
+
   if (!texto) return;
 
   const tarefas = JSON.parse(localStorage.getItem("tarefas")) || [];
@@ -425,38 +512,23 @@ function salvarNovaAcao(event) {
 
   if (tarefa) {
     if (!tarefa.acoes) tarefa.acoes = [];
-    tarefa.acoes.push({ id: Date.now(), texto });
+    tarefa.acoes.push({
+      id: Date.now(),
+      texto: texto
+    });
     localStorage.setItem("tarefas", JSON.stringify(tarefas));
     fecharModalAcao();
     buscarTarefas();
   }
 }
 
-function removerAcao(idTarefa, idAcao) {
+function removerAcao(tarefaId, acaoId) {
   const tarefas = JSON.parse(localStorage.getItem("tarefas")) || [];
-  const tarefa = tarefas.find(t => t.id === idTarefa);
+  const tarefa = tarefas.find(t => t.id === tarefaId);
 
-  if (tarefa) {
-    tarefa.acoes = tarefa.acoes.filter(a => a.id !== idAcao);
+  if (tarefa && tarefa.acoes) {
+    tarefa.acoes = tarefa.acoes.filter(a => a.id !== acaoId);
     localStorage.setItem("tarefas", JSON.stringify(tarefas));
     buscarTarefas();
   }
 }
-
-function deletarTarefa(id) {
-  if (!confirm("Tem certeza que deseja excluir esta tarefa?")) return;
-
-  let tarefas = JSON.parse(localStorage.getItem("tarefas")) || [];
-  tarefas = tarefas.filter(t => t.id !== id);
-  localStorage.setItem("tarefas", JSON.stringify(tarefas));
-  buscarTarefas();
-}
-
-document.addEventListener("keydown", (event) => {
-  if (event.key === "Escape") fecharTodosModais();
-});
-
-// Inicialização
-carregarPreferenciaAparencia();
-inicializarDropdownsCustomizados();
-buscarTarefas();
