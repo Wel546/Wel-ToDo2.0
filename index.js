@@ -103,18 +103,68 @@ function resetFormCriarTarefa() {
 }
 
 // ===================================
-// SISTEMA DE APARÊNCIA E PAPEL DE PAREDE
+// GERENCIAMENTO DE MODAIS E OVERLAY
 // ===================================
+function abrirModal() {
+  fecharTodosModais();
+  overlay.classList.add("active");
+  criarTarefa.classList.add("active");
+}
+
+function fecharModal() {
+  fecharTodosModais();
+}
+
+function abrirModalAcao(id) {
+  fecharTodosModais();
+  tarefaAtual = id;
+  overlay.classList.add("active");
+  modalAcao.classList.add("active");
+}
+
+function fecharModalAcao() {
+  fecharTodosModais();
+}
+
 function abrirModalAparencia() {
+  fecharTodosModais();
   overlay.classList.add("active");
   modalAparencia.classList.add("active");
 }
 
 function fecharModalAparencia() {
-  modalAparencia.classList.remove("active");
-  overlay.classList.remove("active");
+  fecharTodosModais();
 }
 
+function solicitarExclusaoTarefa(id) {
+  fecharTodosModais();
+  idTarefaParaExcluir = id;
+  overlay.classList.add("active");
+  if (modalConfirmarExclusao) modalConfirmarExclusao.classList.add("active");
+}
+
+function fecharModalExclusao() {
+  fecharTodosModais();
+}
+
+function fecharTodosModais() {
+  overlay.classList.remove("active");
+  document.querySelectorAll('.modal').forEach(modal => modal.classList.remove('active'));
+  document.querySelectorAll('.dropdown-custom').forEach(d => d.classList.remove('ativo'));
+
+  const textoAcaoInput = document.getElementById("textoAcao");
+  if (textoAcaoInput) textoAcaoInput.value = "";
+
+  idTarefaParaExcluir = null;
+}
+
+if (overlay) {
+  overlay.addEventListener("click", fecharTodosModais);
+}
+
+// ===================================
+// SISTEMA DE APARÊNCIA E PAPEL DE PAREDE
+// ===================================
 function alterarModo(modo) {
   if (modo === "escuro") {
     document.body.classList.add("dark-theme");
@@ -414,44 +464,8 @@ function inserirTarefas(tarefas) {
 }
 
 // ===================================
-// GERENCIAMENTO DE MODAIS E NOTIFICAÇÕES (TOAST)
+// NOTIFICAÇÕES (TOAST)
 // ===================================
-function abrirModal() {
-  overlay.classList.add("active");
-  criarTarefa.classList.add("active");
-}
-
-function fecharModal() {
-  overlay.classList.remove("active");
-  criarTarefa.classList.remove("active");
-}
-
-function abrirModalAcao(id) {
-  tarefaAtual = id;
-  overlay.classList.add("active");
-  modalAcao.classList.add("active");
-}
-
-function fecharModalAcao() {
-  modalAcao.classList.remove("active");
-  const textoAcaoInput = document.getElementById("textoAcao");
-  if (textoAcaoInput) textoAcaoInput.value = "";
-  overlay.classList.remove("active");
-}
-
-// --- Modais e Notificações de Confirmação ---
-function solicitarExclusaoTarefa(id) {
-  idTarefaParaExcluir = id;
-  overlay.classList.add("active");
-  if (modalConfirmarExclusao) modalConfirmarExclusao.classList.add("active");
-}
-
-function fecharModalExclusao() {
-  idTarefaParaExcluir = null;
-  if (modalConfirmarExclusao) modalConfirmarExclusao.classList.remove("active");
-  overlay.classList.remove("active");
-}
-
 function confirmarExclusaoTarefa() {
   if (idTarefaParaExcluir !== null) {
     deletarTarefa(idTarefaParaExcluir);
@@ -478,23 +492,6 @@ function exibirMensagemObservacao(texto) {
   setTimeout(() => {
     mensagemObservacao.style.display = "none";
   }, 3000);
-}
-
-function fecharTodosModais() {
-  overlay.classList.remove("active");
-  if (criarTarefa) criarTarefa.classList.remove("active");
-  if (modalAcao) modalAcao.classList.remove("active");
-  if (modalAparencia) modalAparencia.classList.remove("active");
-  if (modalConfirmarExclusao) modalConfirmarExclusao.classList.remove("active");
-  
-  const textoAcaoInput = document.getElementById("textoAcao");
-  if (textoAcaoInput) textoAcaoInput.value = "";
-  
-  idTarefaParaExcluir = null;
-}
-
-if (overlay) {
-  overlay.addEventListener("click", fecharTodosModais);
 }
 
 // ===================================

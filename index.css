@@ -157,7 +157,7 @@ header input {
 .seta {
   font-size: 10px;
   display: inline-block;
-  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: transform 0.2s ease;
   transform-origin: center;
 }
 
@@ -165,7 +165,7 @@ header input {
   transform: rotate(180deg);
 }
 
-/* Menu Dropdown com Animação Suave (Slide Down + Fade) */
+/* Menu Dropdown */
 .dropdown-menu {
   position: absolute;
   top: calc(100% + 6px);
@@ -177,12 +177,10 @@ header input {
   padding: 6px;
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
   z-index: 100;
-
-  /* Transição suave de abertura */
   opacity: 0;
   visibility: hidden;
   transform: translateY(-8px);
-  transition: opacity 0.25s ease, transform 0.25s ease, visibility 0.25s ease;
+  transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s ease;
   pointer-events: none;
 }
 
@@ -470,7 +468,7 @@ body.dark-theme .status-select.em_andamento {
 }
 
 /* ===================================
-   SOBREPOSIÇÃO E MODAIS (Z-INDEX CORRIGIDO)
+   CORREÇÃO DA ANIMAÇÃO DOS MODAIS & OVERLAY
    =================================== */
 #overlay {
   width: 100%;
@@ -482,13 +480,14 @@ body.dark-theme .status-select.em_andamento {
   background-color: rgba(0, 0, 0, 0.5);
   visibility: hidden;
   opacity: 0;
-  transition: opacity 200ms ease;
+  pointer-events: none;
+  transition: opacity 0.2s ease, visibility 0.2s ease;
 }
 
-#overlay.active,
-.modal.active {
+#overlay.active {
   opacity: 1;
   visibility: visible;
+  pointer-events: auto;
 }
 
 .modal {
@@ -501,10 +500,18 @@ body.dark-theme .status-select.em_andamento {
   top: 50%;
   left: 50%;
   z-index: 1001;
-  transform: translate(-50%, -50%);
+  transform: translate(-50%, -50%) scale(0.95);
   visibility: hidden;
   opacity: 0;
-  transition: opacity 200ms ease;
+  pointer-events: none;
+  transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s ease;
+}
+
+.modal.active {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transform: translate(-50%, -50%) scale(1);
 }
 
 .modal button {
@@ -733,9 +740,8 @@ footer {
 }
 
 /* ===================================
-   SCROLLBAR QUADRADINHA (FORÇADA NO CHROME & FIREFOX)
+   SCROLLBAR QUADRADINHA
    =================================== */
-
 html {
   overflow-y: scroll !important;
   color-scheme: light dark;
