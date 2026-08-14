@@ -115,7 +115,7 @@
 
     <section id="overlay"></section>
 
-    <!-- Modal Criar Tarefa -->
+    <!-- Modal Criar Tarefa com Dropdowns Customizados -->
     <div id="criarTarefa" class="modal">
       <form onsubmit="novaTarefa(event)">
         <h3>
@@ -126,20 +126,49 @@
         <label for="titulo">Título *</label>
         <input type="text" id="titulo" required>
 
-        <label for="prioridade">Prioridade *</label>
-        <select id="prioridade" required>
-          <option value="baixa">Baixa</option>
-          <option value="media" selected>Média</option>
-          <option value="alta">Alta</option>
-        </select>
+        <!-- Dropdown Customizado: Prioridade -->
+        <div class="filtro-grupo">
+          <label for="prioridade">Prioridade *</label>
+          <select id="prioridade" required style="display: none;">
+            <option value="baixa">Baixa</option>
+            <option value="media" selected>Média</option>
+            <option value="alta">Alta</option>
+          </select>
 
-        <label for="statusProgresso">Status Inicial *</label>
-        <select id="statusProgresso" required>
-          <option value="pendente" selected>🔴 Pendente</option>
-          <option value="em_andamento">🟡 Em andamento</option>
-        </select>
+          <div class="dropdown-custom">
+            <div class="dropdown-trigger" tabindex="0">
+              <span>Média</span>
+              <span class="seta">▼</span>
+            </div>
+            <div class="dropdown-menu">
+              <div class="dropdown-item" data-value="baixa">Baixa</div>
+              <div class="dropdown-item ativo" data-value="media">Média</div>
+              <div class="dropdown-item" data-value="alta">Alta</div>
+            </div>
+          </div>
+        </div>
 
-        <label for="descricao">Descrição *</label>
+        <!-- Dropdown Customizado: Status Inicial -->
+        <div class="filtro-grupo" style="margin-top: 15px;">
+          <label for="statusProgresso">Status Inicial *</label>
+          <select id="statusProgresso" required style="display: none;">
+            <option value="pendente" selected>⌬ Pendente</option>
+            <option value="em_andamento">ꆜ Em andamento</option>
+          </select>
+
+          <div class="dropdown-custom">
+            <div class="dropdown-trigger" tabindex="0">
+              <span>⌬ Pendente</span>
+              <span class="seta">▼</span>
+            </div>
+            <div class="dropdown-menu">
+              <div class="dropdown-item ativo" data-value="pendente">⌬ Pendente</div>
+              <div class="dropdown-item" data-value="em_andamento">ꆜ Em andamento</div>
+            </div>
+          </div>
+        </div>
+
+        <label for="descricao" style="margin-top: 15px; display: block;">Descrição *</label>
         <textarea id="descricao" required></textarea>
 
         <label for="observacao">Observação</label>
@@ -205,6 +234,25 @@
         </div>
       </div>
     </div>
+
+    <!-- Modal de Confirmação de Exclusão -->
+    <div id="modalConfirmarExclusao" class="modal">
+      <h3>
+        Excluir Tarefa
+        <box-icon name='x-circle' onclick="fecharModalExclusao()"></box-icon>
+      </h3>
+      <p style="margin: 15px 0;">Tem certeza que deseja excluir esta tarefa? Esta ação não poderá ser desfeita.</p>
+      <div class="botoes-grupo" style="display: flex; gap: 10px; justify-content: flex-end;">
+        <button type="button" style="background-color: #747d8c;" onclick="fecharModalExclusao()">Cancelar</button>
+        <button type="button" style="background-color: #ff4757;" onclick="confirmarExclusaoTarefa()">Excluir</button>
+      </div>
+    </div>
+
+    <!-- Mensagem em Span para Confirmação de Exclusão -->
+    <span id="mensagemExclusao" class="mensagem-toast" style="display: none;"></span>
+
+    <!-- Mensagem em Span para Confirmação de Observação Salva -->
+    <span id="mensagemObservacao" class="mensagem-toast" style="display: none;"></span>
 
   </main>
 

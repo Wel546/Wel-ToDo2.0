@@ -10,11 +10,15 @@ const criarTarefa = document.getElementById("criarTarefa");
 const busca = document.getElementById("busca");
 const modalAcao = document.getElementById("modalAcao");
 const modalAparencia = document.getElementById("modalAparencia");
+const modalConfirmarExclusao = document.getElementById("modalConfirmarExclusao");
+const mensagemExclusao = document.getElementById("mensagemExclusao");
+const mensagemObservacao = document.getElementById("mensagemObservacao");
 const ordenarPor = document.getElementById("ordenarPor");
 const filtrarPrioridade = document.getElementById("filtrarPrioridade");
 const filtrarStatus = document.getElementById("filtrarStatus");
 
 let tarefaAtual = null;
+let idTarefaParaExcluir = null;
 
 // ===================================
 // INICIALIZAÇÃO DA APLICAÇÃO
@@ -46,18 +50,23 @@ function inicializarDropdownsCustomizados() {
     });
 
     items.forEach(item => {
-      item.addEventListener('click', () => {
+      item.addEventListener('click', (e) => {
+        e.stopPropagation();
         const value = item.getAttribute('data-value');
         const text = item.innerText;
 
-        trigger.querySelector('span').innerText = text;
+        const labelSpan = trigger.querySelector('span');
+        if (labelSpan) labelSpan.innerText = text;
         
         items.forEach(i => i.classList.remove('ativo'));
         item.classList.add('ativo');
 
         if (selectOriginal) {
           selectOriginal.value = value;
-          buscarTarefas();
+          // Executa busca apenas para os filtros do cabeçalho
+          if (selectOriginal.id === "ordenarPor" || selectOriginal.id === "filtrarPrioridade" || selectOriginal.id === "filtrarStatus") {
+            buscarTarefas();
+          }
         }
 
         dropdown.classList.remove('ativo');
@@ -65,8 +74,31 @@ function inicializarDropdownsCustomizados() {
     });
   });
 
+  // Fecha todos os dropdowns ao clicar fora
   document.addEventListener('click', () => {
     document.querySelectorAll('.dropdown-custom').forEach(d => d.classList.remove('ativo'));
+  });
+}
+
+function resetFormCriarTarefa() {
+  const formCriar = document.querySelector("#criarTarefa form");
+  if (formCriar) formCriar.reset();
+
+  // Reseta visualmente o texto do gatilho dos dropdowns no modal
+  const prioTrigger = document.querySelector("#criarTarefa #prioridade + .dropdown-custom .dropdown-trigger span");
+  if (prioTrigger) prioTrigger.innerText = "Média";
+
+  const statusTrigger = document.querySelector("#criarTarefa #statusProgresso + .dropdown-custom .dropdown-trigger span");
+  if (statusTrigger) statusTrigger.innerText = "⌬ Pendente";
+
+  // Reseta classes ativas das opções no modal
+  document.querySelectorAll("#criarTarefa .dropdown-item").forEach(item => {
+    const val = item.getAttribute("data-value");
+    if (val === "media" || val === "pendente") {
+      item.classList.add("ativo");
+    } else {
+      item.classList.remove("ativo");
+    }
   });
 }
 
@@ -108,7 +140,8 @@ function uploadPapelParede(event) {
     reader.onload = function(e) {
       const base64Image = e.target.result;
       document.documentElement.style.setProperty('--bg-image', `url('${base64Image}')`);
-      document.getElementById("bgUrl").value = "";
+      const bgUrlInput = document.getElementById("bgUrl");
+      if (bgUrlInput) bgUrlInput.value = "";
       salvarPreferenciaAparencia();
     };
     reader.readAsDataURL(file);
@@ -116,18 +149,23 @@ function uploadPapelParede(event) {
 }
 
 function aplicarPapelParede() {
-  const url = document.getElementById("bgUrl").value.trim();
+  const bgUrlInput = document.getElementById("bgUrl");
+  const bgFileInput = document.getElementById("bgFile");
+  const url = bgUrlInput ? bgUrlInput.value.trim() : "";
+
   if (url) {
     document.documentElement.style.setProperty('--bg-image', `url('${url}')`);
-    document.getElementById("bgFile").value = "";
+    if (bgFileInput) bgFileInput.value = "";
     salvarPreferenciaAparencia();
   }
 }
 
 function removerPapelParede() {
   document.documentElement.style.setProperty('--bg-image', 'none');
-  document.getElementById("bgUrl").value = "";
-  document.getElementById("bgFile").value = "";
+  const bgUrlInput = document.getElementById("bgUrl");
+  const bgFileInput = document.getElementById("bgFile");
+  if (bgUrlInput) bgUrlInput.value = "";
+  if (bgFileInput) bgFileInput.value = "";
   salvarPreferenciaAparencia();
 }
 
@@ -183,7 +221,7 @@ function buscarTarefas() {
   let tarefas = JSON.parse(localStorage.getItem("tarefas")) || [];
 
   // 1. Filtro por Busca de Texto
-  const termo = busca.value.toLowerCase().trim();
+  const termo = busca ? busca.value.toLowerCase().trim() : "";
   if (termo) {
     tarefas = tarefas.filter(t => 
       t.titulo.toLowerCase().includes(termo) || 
@@ -201,13 +239,10 @@ function buscarTarefas() {
   const statusFiltro = filtrarStatus ? filtrarStatus.value : "todos";
 
   if (statusFiltro === "pendente") {
-    // Apenas pendentes E que NÃO estejam concluídas
     tarefas = tarefas.filter(t => !t.concluida && (t.statusProgresso || "pendente") === "pendente");
   } else if (statusFiltro === "em_andamento") {
-    // Apenas em andamento E que NÃO estejam concluídas
     tarefas = tarefas.filter(t => !t.concluida && t.statusProgresso === "em_andamento");
   } else if (statusFiltro === "concluida") {
-    // Apenas tarefas marcadas como concluídas
     tarefas = tarefas.filter(t => t.concluida);
   }
 
@@ -268,7 +303,7 @@ function inserirTarefas(tarefas) {
     if (tarefa.concluida) li.classList.add("concluida");
     if (tarefa.fixada) li.classList.add("fixada");
 
-    const rotuloStatus = stProgresso === "em_andamento" ? "🟡 Em andamento" : "🔴 Pendente";
+    const rotuloStatus = stProgresso === "em_andamento" ? "ꆜ Em andamento" : "⌬ Pendente";
 
     li.innerHTML = `
       <div class="card-header">
@@ -284,7 +319,7 @@ function inserirTarefas(tarefas) {
           <box-icon 
             name="trash-alt" 
             class="trash-btn" 
-            onclick="deletarTarefa(${tarefa.id})"
+            onclick="solicitarExclusaoTarefa(${tarefa.id})"
             title="Excluir tarefa">
           </box-icon>
         </div>
@@ -295,12 +330,12 @@ function inserirTarefas(tarefas) {
         <span class="data-registro">Criado: ${formatarData(tarefa.criadaEm)}</span>
       </div>
 
-      <!-- DROPDOWN CUSTOMIZADO DE STATUS DE PROGRESSO (Ocultado quando concluída) -->
+      <!-- DROPDOWN CUSTOMIZADO DE STATUS DE PROGRESSO -->
       <div class="status-select-container" style="display: ${tarefa.concluida ? 'none' : 'block'};">
         <div class="dropdown-custom dropdown-card">
           <div class="dropdown-trigger">
             <span>${rotuloStatus}</span>
-            <box-icon name="chevron-down"></box-icon>
+            <span class="seta">▼</span>
           </div>
           <div class="dropdown-menu">
             <div 
@@ -308,14 +343,14 @@ function inserirTarefas(tarefas) {
               data-value="pendente"
               onclick="alterarStatusProgresso(${tarefa.id}, 'pendente')"
             >
-              🔴 Pendente
+              ⌬ Pendente
             </div>
             <div 
               class="dropdown-item ${stProgresso === 'em_andamento' ? 'ativo' : ''}" 
               data-value="em_andamento"
               onclick="alterarStatusProgresso(${tarefa.id}, 'em_andamento')"
             >
-              🟡 Em andamento
+              ꆜ Em andamento
             </div>
           </div>
         </div>
@@ -367,7 +402,6 @@ function inserirTarefas(tarefas) {
 
       <button
         class="salvar-btn"
-        style="background-color: var(--text-muted);"
         onclick="abrirModalAcao(${tarefa.id})">
         + Nova ação
       </button>
@@ -380,7 +414,7 @@ function inserirTarefas(tarefas) {
 }
 
 // ===================================
-// GERENCIAMENTO DE MODAIS
+// GERENCIAMENTO DE MODAIS E NOTIFICAÇÕES (TOAST)
 // ===================================
 function abrirModal() {
   overlay.classList.add("active");
@@ -400,19 +434,68 @@ function abrirModalAcao(id) {
 
 function fecharModalAcao() {
   modalAcao.classList.remove("active");
-  document.getElementById("textoAcao").value = "";
+  const textoAcaoInput = document.getElementById("textoAcao");
+  if (textoAcaoInput) textoAcaoInput.value = "";
   overlay.classList.remove("active");
+}
+
+// --- Modais e Notificações de Confirmação ---
+function solicitarExclusaoTarefa(id) {
+  idTarefaParaExcluir = id;
+  overlay.classList.add("active");
+  if (modalConfirmarExclusao) modalConfirmarExclusao.classList.add("active");
+}
+
+function fecharModalExclusao() {
+  idTarefaParaExcluir = null;
+  if (modalConfirmarExclusao) modalConfirmarExclusao.classList.remove("active");
+  overlay.classList.remove("active");
+}
+
+function confirmarExclusaoTarefa() {
+  if (idTarefaParaExcluir !== null) {
+    deletarTarefa(idTarefaParaExcluir);
+    fecharModalExclusao();
+    exibirMensagemExclusao("Tarefa excluída com sucesso!");
+  }
+}
+
+function exibirMensagemExclusao(texto) {
+  if (!mensagemExclusao) return;
+  mensagemExclusao.innerText = texto;
+  mensagemExclusao.style.display = "block";
+
+  setTimeout(() => {
+    mensagemExclusao.style.display = "none";
+  }, 3000);
+}
+
+function exibirMensagemObservacao(texto) {
+  if (!mensagemObservacao) return;
+  mensagemObservacao.innerText = texto;
+  mensagemObservacao.style.display = "block";
+
+  setTimeout(() => {
+    mensagemObservacao.style.display = "none";
+  }, 3000);
 }
 
 function fecharTodosModais() {
   overlay.classList.remove("active");
-  criarTarefa.classList.remove("active");
-  modalAcao.classList.remove("active");
-  modalAparencia.classList.remove("active");
-  document.getElementById("textoAcao").value = "";
+  if (criarTarefa) criarTarefa.classList.remove("active");
+  if (modalAcao) modalAcao.classList.remove("active");
+  if (modalAparencia) modalAparencia.classList.remove("active");
+  if (modalConfirmarExclusao) modalConfirmarExclusao.classList.remove("active");
+  
+  const textoAcaoInput = document.getElementById("textoAcao");
+  if (textoAcaoInput) textoAcaoInput.value = "";
+  
+  idTarefaParaExcluir = null;
 }
 
-overlay.addEventListener("click", fecharTodosModais);
+if (overlay) {
+  overlay.addEventListener("click", fecharTodosModais);
+}
 
 // ===================================
 // AÇÕES E MUTAÇÕES DE TAREFAS
@@ -428,7 +511,7 @@ function novaTarefa(event) {
     prioridade: prioridade.value,
     statusProgresso: statusProgresso.value,
     descricao: descricao.value.trim(),
-    observacao: observacao.value.trim(),
+    observacao: observacao ? observacao.value.trim() : "",
     concluida: false,
     fixada: false,
     criadaEm: new Date().toISOString(),
@@ -438,7 +521,7 @@ function novaTarefa(event) {
   if (nova.titulo && nova.descricao) {
     tarefas.push(nova);
     localStorage.setItem("tarefas", JSON.stringify(tarefas));
-    document.querySelector("#criarTarefa form").reset();
+    resetFormCriarTarefa();
     fecharModal();
     buscarTarefas();
   } else {
@@ -495,6 +578,7 @@ function salvarObservacao(id) {
     tarefa.observacao = inputObs.value.trim();
     localStorage.setItem("tarefas", JSON.stringify(tarefas));
     buscarTarefas();
+    exibirMensagemObservacao("Observação salva com sucesso!");
   }
 }
 
@@ -503,7 +587,7 @@ function salvarNovaAcao(event) {
   if (!tarefaAtual) return;
 
   const textoAcaoInput = document.getElementById("textoAcao");
-  const texto = textoAcaoInput.value.trim();
+  const texto = textoAcaoInput ? textoAcaoInput.value.trim() : "";
 
   if (!texto) return;
 

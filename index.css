@@ -6,6 +6,7 @@
   --text-color: #333333;
   --border-color: #dedede;
   --bg-image: none;
+  --text-muted: #747d8c;
 }
 
 /* Modo Escuro */
@@ -14,6 +15,7 @@ body.dark-theme {
   --card-bg: #1e1e1e;
   --text-color: #e0e0e0;
   --border-color: #333333;
+  --text-muted: #a0a0a0;
 }
 
 * {
@@ -38,10 +40,16 @@ body {
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 
+/* ===================================
+   CABEÇALHO COM SOMBRA NA COR PRIMÁRIA
+   =================================== */
 header {
   background-color: var(--primary-color);
   padding: 16px 20px;
-  transition: background-color 0.3s ease;
+  box-shadow: 0 4px 15px var(--primary-color);
+  position: relative;
+  z-index: 10;
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 .header-container {
@@ -71,13 +79,6 @@ header input {
 }
 
 #busca {
-  padding: 10px 14px;
-  border: 1px solid var(--border-color, #ccc);
-  border-radius: 8px;
-  background-color: var(--card-bg, #ffffff);
-  color: var(--text-color);
-  font-size: 14px;
-  outline: none;
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
@@ -93,6 +94,18 @@ header input {
   display: flex;
   align-items: center;
   justify-content: center;
+  transition: fill 0.2s ease;
+}
+
+.tema-btn box-icon,
+.tema-btn {
+  transition: fill 0.3s ease, filter 0.3s ease, transform 0.2s ease !important;
+}
+
+.tema-btn:hover box-icon {
+  fill: var(--primary-hover) !important;
+  filter: brightness(0.85);
+  transform: scale(1.1);
 }
 
 .controles-filtros {
@@ -140,22 +153,44 @@ header input {
   box-shadow: 0 0 0 2px rgba(27, 118, 221, 0.2);
 }
 
+/* Estilização e animação de giro da Seta ▼ */
+.seta {
+  font-size: 10px;
+  display: inline-block;
+  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  transform-origin: center;
+}
+
+.dropdown-custom.ativo .seta {
+  transform: rotate(180deg);
+}
+
+/* Menu Dropdown com Animação Suave (Slide Down + Fade) */
 .dropdown-menu {
-  display: none;
   position: absolute;
-  top: calc(100% + 4px);
+  top: calc(100% + 6px);
   left: 0;
   right: 0;
   background-color: var(--card-bg);
   border: 1px solid var(--border-color);
   border-radius: 10px;
   padding: 6px;
-  box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
   z-index: 100;
+
+  /* Transição suave de abertura */
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-8px);
+  transition: opacity 0.25s ease, transform 0.25s ease, visibility 0.25s ease;
+  pointer-events: none;
 }
 
 .dropdown-custom.ativo .dropdown-menu {
-  display: block;
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+  pointer-events: auto;
 }
 
 .dropdown-item {
@@ -263,7 +298,7 @@ header input {
 }
 
 .trash-btn:hover {
-  fill: #e74c3c;
+  fill: var(--primary-color);
 }
 
 .badge-container {
@@ -434,13 +469,16 @@ body.dark-theme .status-select.em_andamento {
   text-decoration: line-through;
 }
 
+/* ===================================
+   SOBREPOSIÇÃO E MODAIS (Z-INDEX CORRIGIDO)
+   =================================== */
 #overlay {
   width: 100%;
   height: 100%;
   position: fixed;
   top: 0;
   left: 0;
-  z-index: 1;
+  z-index: 1000;
   background-color: rgba(0, 0, 0, 0.5);
   visibility: hidden;
   opacity: 0;
@@ -462,11 +500,24 @@ body.dark-theme .status-select.em_andamento {
   position: fixed;
   top: 50%;
   left: 50%;
-  z-index: 2;
+  z-index: 1001;
   transform: translate(-50%, -50%);
   visibility: hidden;
   opacity: 0;
   transition: opacity 200ms ease;
+}
+
+.modal button {
+  height: 40px;
+  padding: 0 16px;
+  border-radius: 5px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: filter 0.2s;
+}
+
+.modal button:hover {
+  filter: brightness(0.9);
 }
 
 #desc {
@@ -479,13 +530,13 @@ hr {
   height: 1px;
   width: 100%;
   border: 0;
-  background-color: var(--border-color);
+  background-color: var(--primary-color);
   margin: 6px 0;
 }
 
 .modal form h3, .modal h3 {
   font-size: 20px;
-  color: var(--text-muted);
+  color: var(--primary-color);
   margin-bottom: 20px;
   display: flex;
   justify-content: space-between;
@@ -493,7 +544,13 @@ hr {
 }
 
 .modal form h3 box-icon, .modal h3 box-icon {
-  fill: var(--text-muted);
+  fill: var(--primary-color);
+  cursor: pointer;
+  transition: fill 0.2s ease;
+}
+
+.modal form h3 box-icon:hover, .modal h3 box-icon:hover {
+  fill: var(--primary-hover);
   cursor: pointer;
 }
 
@@ -589,10 +646,58 @@ hr {
   box-shadow: 0 0 5px rgba(0,0,0,0.3);
 }
 
+/* ===================================
+   DROPDOWNS CUSTOMIZADOS EM MODAIS
+   =================================== */
+.modal .filtro-grupo {
+  color: var(--text-color);
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  width: 100%;
+}
+
+.modal .dropdown-custom {
+  width: 100%;
+}
+
+.modal .dropdown-trigger {
+  height: 42px;
+  border-width: 2px;
+}
+
+/* --- ESTILIZAÇÃO MENSAGEM TOAST --- */
+.mensagem-toast {
+  position: fixed;
+  bottom: 25px;
+  right: 25px;
+  background-color: var(--card-bg);
+  color: var(--text-color);
+  padding: 12px 20px;
+  border-radius: 8px;
+  border-left: 5px solid var(--primary-color);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.25);
+  font-size: 14px;
+  font-weight: bold;
+  z-index: 1002;
+  animation: slideInToast 0.3s ease-out forwards;
+}
+
+@keyframes slideInToast {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
 footer {
   margin: 40px 0 20px 0;
   text-align: center;
-  color: var(--text-muted);
+  color: var(--primary-color);
 }
 
 @media (max-width: 900px) {
@@ -618,4 +723,50 @@ footer {
   .modal {
     width: 90%;
   }
+
+  .mensagem-toast {
+    right: 5%;
+    left: 5%;
+    bottom: 15px;
+    text-align: center;
+  }
+}
+
+/* ===================================
+   SCROLLBAR QUADRADINHA (FORÇADA NO CHROME & FIREFOX)
+   =================================== */
+
+html {
+  overflow-y: scroll !important;
+  color-scheme: light dark;
+}
+
+* {
+  scrollbar-width: thin !important;
+  scrollbar-color: var(--primary-color) var(--card-bg) !important;
+}
+
+*::-webkit-scrollbar,
+::-webkit-scrollbar {
+  -webkit-appearance: none !important;
+  width: 8px !important;
+  height: 8px !important;
+}
+
+*::-webkit-scrollbar-track,
+::-webkit-scrollbar-track {
+  background-color: var(--card-bg) !important;
+  border-radius: 0px !important;
+}
+
+*::-webkit-scrollbar-thumb,
+::-webkit-scrollbar-thumb {
+  background-color: var(--primary-color) !important;
+  border-radius: 0px !important;
+  border: none !important;
+}
+
+*::-webkit-scrollbar-thumb:hover,
+::-webkit-scrollbar-thumb:hover {
+  background-color: var(--primary-hover) !important;
 }
