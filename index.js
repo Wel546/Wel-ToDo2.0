@@ -106,16 +106,16 @@ function resetFormCriarTarefa() {
 // GERENCIAMENTO DE MODAIS E OVERLAY
 // ===================================
 function abrirModal() {
-fecharTodosModais();
+  fecharTodosModais();
   document.body.style.overflow = "hidden";
   overlay.classList.add("active");
   criarTarefa.classList.add("active");
 }
 
 function fecharModal() {
-document.body.style.overflow = ""; 
+  document.body.style.overflow = ""; 
   overlay.classList.remove("active");
-  document.querySelectorAll('.modal').forEach(modal => modal.classList.remove('active'))
+  document.querySelectorAll('.modal').forEach(modal => modal.classList.remove('active'));
 }
 
 function abrirModalAcao(id) {
@@ -379,7 +379,37 @@ function inserirTarefas(tarefas) {
       </div>
 
       <div class="badge-container">
-        <span class="badge badge-${tarefa.prioridade}">${tarefa.prioridade}</span>
+        <!-- DROPDOWN DE PRIORIDADE EDITÁVEL NO CARD -->
+        <div class="dropdown-custom dropdown-badge badge-${tarefa.prioridade}">
+          <div class="dropdown-trigger">
+            <span>${tarefa.prioridade}</span>
+            <span class="seta">▼</span>
+          </div>
+          <div class="dropdown-menu">
+            <div 
+              class="dropdown-item ${tarefa.prioridade === 'baixa' ? 'ativo' : ''}" 
+              data-value="baixa"
+              onclick="alterarPrioridade(${tarefa.id}, 'baixa')"
+            >
+              Baixa
+            </div>
+            <div 
+              class="dropdown-item ${tarefa.prioridade === 'media' ? 'ativo' : ''}" 
+              data-value="media"
+              onclick="alterarPrioridade(${tarefa.id}, 'media')"
+            >
+              Média
+            </div>
+            <div 
+              class="dropdown-item ${tarefa.prioridade === 'alta' ? 'ativo' : ''}" 
+              data-value="alta"
+              onclick="alterarPrioridade(${tarefa.id}, 'alta')"
+            >
+              Alta
+            </div>
+          </div>
+        </div>
+
         <span class="data-registro">Criado: ${formatarData(tarefa.criadaEm)}</span>
       </div>
 
@@ -545,6 +575,17 @@ function deletarTarefa(id) {
   tarefas = tarefas.filter(t => t.id !== id);
   localStorage.setItem("tarefas", JSON.stringify(tarefas));
   buscarTarefas();
+}
+
+function alterarPrioridade(id, novaPrioridade) {
+  const tarefas = JSON.parse(localStorage.getItem("tarefas")) || [];
+  const tarefa = tarefas.find(t => t.id === id);
+
+  if (tarefa) {
+    tarefa.prioridade = novaPrioridade;
+    localStorage.setItem("tarefas", JSON.stringify(tarefas));
+    buscarTarefas();
+  }
 }
 
 function alterarStatusProgresso(id, novoStatus) {

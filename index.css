@@ -307,6 +307,51 @@ header input {
   margin: 4px 0;
 }
 
+/* Badge Editável de Prioridade no Card */
+.dropdown-badge {
+  min-width: auto;
+}
+
+.dropdown-badge .dropdown-trigger {
+  height: auto;
+  padding: 3px 8px;
+  border-radius: 12px;
+  border: none;
+  font-size: 11px;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+.dropdown-badge.badge-alta .dropdown-trigger {
+  background-color: #ffe5e5;
+  color: #d93025;
+}
+
+.dropdown-badge.badge-media .dropdown-trigger {
+  background-color: #fff4e5;
+  color: #b06000;
+}
+
+.dropdown-badge.badge-baixa .dropdown-trigger {
+  background-color: #e6f4ea;
+  color: #137333;
+}
+
+body.dark-theme .dropdown-badge.badge-alta .dropdown-trigger {
+  background-color: #3e1414;
+  color: #ef9a9a;
+}
+
+body.dark-theme .dropdown-badge.badge-media .dropdown-trigger {
+  background-color: #3e3214;
+  color: #ffe082;
+}
+
+body.dark-theme .dropdown-badge.badge-baixa .dropdown-trigger {
+  background-color: #143e1d;
+  color: #a8dab5;
+}
+
 .badge {
   font-size: 11px;
   font-weight: bold;
@@ -316,17 +361,17 @@ header input {
 }
 
 .badge-alta {
-  background-color: #ffe5e5;
+  background-color: transparent;
   color: #d93025;
 }
 
 .badge-media {
-  background-color: #fff4e5;
+  background-color: transparent;
   color: #b06000;
 }
 
 .badge-baixa {
-  background-color: #e6f4ea;
+  background-color: transparent;
   color: #137333;
 }
 
